@@ -1,0 +1,29 @@
+app:
+  db:
+    url: localhost:5432
+    jdbc-url: jdbc:postgresql://localhost:5432/farid
+    username: farid
+    password: farid
+    schema: bestcommerce
+
+---
+spring:
+
+  datasource:
+    url:      ${app.db.url}
+    username: ${app.db.username}
+    password: ${app.db.password}
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      connection-timeout: 2000
+      jdbc-url: ${app.db.jdbc-url}
+      username: ${app.db.username}
+      password: ${app.db.password}
+      schema:   ${app.db.schema}
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
