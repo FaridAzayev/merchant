@@ -110,6 +110,32 @@
                 </dependencies>
             </plugin>
 
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>${jooq-codegen-maven.version}</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <jdbc>
+                                <url>${db.jdbc-url}</url>
+                                <user>${db.username}</user>
+                                <password>${db.password}</password>
+                                <driver>${db.jdbc-driver-class-name}</driver>
+                            </jdbc>
+                            <generator>
+                                <database>
+                                    <inputSchema>${db.schema}</inputSchema>
+                                </database>
+                            </generator>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
