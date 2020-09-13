@@ -1,0 +1,13 @@
+---
+spring:
+  datasource:
+    url:      ${db.url:localhost:5432}
+    username: ${db.username:farid}
+    password: ${db.password:farid}
+    driver-class-name: ${db.jdbc-driver-class-name:org.postgresql.Driver}
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      jdbc-url: ${db.jdbc-url:jdbc:postgresql://localhost:5432/farid?currentSchema=bestcommerce}
+      schema:   ${db.schema:bestcommerce}
+      connection-timeout: ${db.connection-timeout:2000}
+      maximum-pool-size: ${db.pool-size:5}
