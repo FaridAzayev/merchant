@@ -1,3 +1,6 @@
+app:
+  kafka:
+    consumer-topic: test
 ---
 spring:
 #  config:
