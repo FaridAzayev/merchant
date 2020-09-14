@@ -1,5 +1,7 @@
 ---
 spring:
+#  config:
+#    additional-location: app-config.properties
   datasource:
     url:      ${db.url:localhost:5432}
     username: ${db.username:farid}
@@ -11,3 +13,11 @@ spring:
       schema:   ${db.schema:bestcommerce}
       connection-timeout: ${db.connection-timeout:2000}
       maximum-pool-size: ${db.pool-size:5}
+
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: merchant
+      bootstrap-servers: localhost:9092
