@@ -5,6 +5,7 @@ app:
 spring:
 #  config:
 #    additional-location: app-config.properties
+
   datasource:
     url:      ${db.url:localhost:5432}
     username: ${db.username:farid}

@@ -1,13 +1,17 @@
 package com.bestcommerce.merchant.kafka.consumer;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 @Service
-public class StringConsumer {
+@Slf4j
+public class StringConsumer implements Consumer {
 
-    @KafkaListener(topics = "${app.kafka.consumer-topic}", groupId = "merchant")
+    @Override
+    @KafkaListener(topics = "${app.kafka.consumer-topic}")
     public void consume(String message) {
-        System.out.println("New message: " + message);
+        log.info("New message: {}", message);
     }
+
 }
