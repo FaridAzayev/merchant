@@ -11,24 +11,48 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MerchantTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static Owner OWNER = new Owner("farid", "farid@email.com", "5555555", "Baki , Azerbaijan");
 
     @Test
     void serialize() throws IOException {
-        Merchant merchant = new Merchant("test-test");
+        Merchant given = new Merchant(OWNER, "sale", "test-salesman", "123456");
+        String expected = "{" +
+                "\"owner\":" +
+                "{" +
+                    "\"name\":\"farid\"," +
+                    "\"email\":\"farid@email.com\"," +
+                    "\"phone\":\"5555555\"," +
+                    "\"address\":\"Baki , Azerbaijan\"" +
+                "}," +
+                "\"type\":\"sale\"," +
+                "\"name\":\"test-salesman\"," +
+                "\"password\":\"123456\"" +
+                "}";
 
-        String json = MAPPER.writeValueAsString(merchant);
+        String actual = MAPPER.writeValueAsString(given);
 
-        assertThat(json).isEqualTo("test");
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
     void deserialize() throws IOException {
-        Merchant merchant = new Merchant("test-test");
+        String given = "{" +
+                "\"owner\":" +
+                "{" +
+                    "\"name\":\"farid\"," +
+                    "\"email\":\"farid@email.com\"," +
+                    "\"phone\":\"5555555\"," +
+                    "\"address\":\"Baki , Azerbaijan\"" +
+                "}," +
+                "\"type\":\"sale\"," +
+                "\"name\":\"test-salesman\"," +
+                "\"password\":\"123456\"" +
+                "}";
+        Merchant expected = new Merchant(OWNER, "sale", "test-salesman", "123456");
 
-        var a = MAPPER.readValue("{\"test\":\"1\"}", Merchant.class);
+        var actual = MAPPER.readValue(given, Merchant.class);
 
-
-        assertThat(a).isEqualTo("test");
+        assertThat(actual).isEqualTo(expected);
     }
 
 }
