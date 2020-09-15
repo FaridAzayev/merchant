@@ -5,13 +5,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
 @Getter
 @EqualsAndHashCode
 public class Merchant {
 
+    @NotNull(message = "Owner field should not be null")
     private final Owner owner;
+
+    @NotEmpty(message = "Merchant type should not be empty or null ")
     private final String type;
+
+    @NotEmpty(message = "Merchant name should not be empty or null ")
     private final String name;
+
+    @Pattern(regexp = "[a-zA-Z0-9]{6}[a-zA-Z0-9]*", message = "Merchant password should be at least 6 alfa-numeric character")
     private final String password;
 
     @JsonCreator
