@@ -10,7 +10,8 @@ app:
       topic: sign-in-result
 
   jwt:
-    secret: test-farid
+    secret: secret-text
+    validity-period-ms: 18000000
 ---
 spring:
   jpa:

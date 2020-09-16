@@ -2,12 +2,14 @@ app:
   kafka:
     sign-up-consumer:
       topic: sign-up
-
     sign-in-consumer:
       topic: sign-in
-
     sign-in-producer:
       topic: sign-in-result
+
+  jwt:
+    secret: secret-text
+    validity-period-ms: 18000000
 
 ---
 spring:

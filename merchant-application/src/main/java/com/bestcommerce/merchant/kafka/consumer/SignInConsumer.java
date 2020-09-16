@@ -2,6 +2,7 @@ package com.bestcommerce.merchant.kafka.consumer;
 
 import com.bestcommerce.merchant.JwtTokenUtil;
 import com.bestcommerce.merchant.api.SignInRequest;
+import com.bestcommerce.merchant.api.SignInResponse;
 import com.bestcommerce.merchant.jooq.dto.MerchantDTO;
 import com.bestcommerce.merchant.jooq.repository.MerchantRepository;
 import com.bestcommerce.merchant.kafka.producer.SignInProducer;
@@ -29,15 +30,18 @@ public class SignInConsumer implements Consumer {
 
     private final MerchantRepository merchantRepository;
     private final SignInProducer signInProducer;
+    private final JwtTokenUtil jwtTokenUtil;
 
     @Value("${app.kafka.sign-in-producer.topic}")
     private String signInProducerTopic;
 
     @Autowired
     public SignInConsumer(MerchantRepository merchantRepository,
-                          SignInProducer signInProducer) {
+                          SignInProducer signInProducer,
+                          JwtTokenUtil jwtTokenUtil) {
         this.merchantRepository = merchantRepository;
         this.signInProducer = signInProducer;
+        this.jwtTokenUtil = jwtTokenUtil;
     }
 
 
@@ -50,9 +54,21 @@ public class SignInConsumer implements Consumer {
             MerchantDTO merchantDTO = merchantRepository.get(inRequest.getName(), inRequest.getPassword());
             log.info("Got {} for in request {}", merchantDTO, inRequest);
 
-            String token = new JwtTokenUtil().generateToken(merchantDTO);
-            signInProducer.send(signInProducerTopic, token);
+            String token = jwtTokenUtil.generateToken(merchantDTO);
+
+            buildResponse(inRequest, token).ifPresent(
+                    response -> signInProducer.send(signInProducerTopic, response)
+            );
         });
+    }
+
+    private Optional<String> buildResponse(SignInRequest inRequest, String token) {
+        try {
+            return Optional.of(MAPPER.writeValueAsString(new SignInResponse(inRequest.getName(), token)));
+        } catch (JsonProcessingException e) {
+            log.error("Got error during serialization of response", e);
+            return Optional.empty();
+        }
     }
 
     private Optional<SignInRequest> getSignIn(String message) {
