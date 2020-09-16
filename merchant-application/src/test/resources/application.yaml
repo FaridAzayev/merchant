@@ -1,0 +1,17 @@
+app:
+  kafka:
+    consumer-topic: test
+---
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate.format_s ql: true
+
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: merchant
+      bootstrap-servers: localhost:9092
