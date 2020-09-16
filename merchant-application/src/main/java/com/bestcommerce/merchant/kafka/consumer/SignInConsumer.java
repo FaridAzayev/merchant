@@ -1,10 +1,8 @@
 package com.bestcommerce.merchant.kafka.consumer;
 
 import com.bestcommerce.merchant.JwtTokenUtil;
-import com.bestcommerce.merchant.api.Merchant;
 import com.bestcommerce.merchant.api.SignInRequest;
 import com.bestcommerce.merchant.jooq.dto.MerchantDTO;
-import com.bestcommerce.merchant.jooq.dto.OwnerDTO;
 import com.bestcommerce.merchant.jooq.repository.MerchantRepository;
 import com.bestcommerce.merchant.kafka.producer.SignInProducer;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -75,6 +73,5 @@ public class SignInConsumer implements Consumer {
             return Optional.empty();
         }
     }
-
 
 }
