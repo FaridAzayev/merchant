@@ -1,16 +1,27 @@
-package com.bestcommerce.merchant.kafka.producer;
+package com.bestcommerce.merchant.kafka.consumer;
 
+import com.bestcommerce.merchant.JwtTokenUtil;
+import com.bestcommerce.merchant.api.SignInRequest;
+import com.bestcommerce.merchant.jooq.dto.MerchantDTO;
+import com.bestcommerce.merchant.jooq.repository.MerchantRepository;
+import com.bestcommerce.merchant.kafka.producer.SignInProducer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
@@ -20,30 +31,43 @@ import org.springframework.kafka.test.utils.ContainerTestUtils;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @EmbeddedKafka
 @ExtendWith(SpringExtension.class)
-class SignInProducerTest {
+@SpringBootTest
+@Disabled
+class SignInConsumerTest {
 
     private static final String TOPIC = "test-top";
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Autowired
     private EmbeddedKafkaBroker embeddedKafkaBroker;
+
+    Producer<String, String> producer;
 
     BlockingQueue<ConsumerRecord<String, String>> records;
 
     KafkaMessageListenerContainer<String, String> container;
 
+    @Mock
+    MerchantRepository merchantRepository;
+    @Mock
     SignInProducer signInProducer;
+    @Mock
+    JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    @InjectMocks
+    SignInConsumer signInConsumer;
 
     @BeforeEach
     void setUp() {
@@ -56,12 +80,25 @@ class SignInProducerTest {
         container.start();
         ContainerTestUtils.waitForAssignment(container, embeddedKafkaBroker.getPartitionsPerTopic());
 
+        //producer
         Map<String, Object> producerConfigs = new HashMap<>(KafkaTestUtils.producerProps(embeddedKafkaBroker));
-        DefaultKafkaProducerFactory<String, String> defaultKafkaProducerFactory = new DefaultKafkaProducerFactory<>(producerConfigs, new StringSerializer(), new StringSerializer());
+        producer = new DefaultKafkaProducerFactory<>(configs, new StringSerializer(), new StringSerializer()).createProducer();
 
-        KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(defaultKafkaProducerFactory);
+        //mocks
+//        merchantRepository = Mockito.mock(MerchantRepository.class);
+//        signInProducer = Mockito.mock(SignInProducer.class);
+//        jwtTokenUtil = Mockito.mock(JwtTokenUtil.class);
 
-        signInProducer = new SignInProducer(kafkaTemplate);
+
+        MerchantDTO merchant =  MerchantDTO.builder()
+                .name("name")
+                .build();
+        given(merchantRepository.get(any(), any())).willReturn(merchant);
+
+        String token = "token";
+        given(jwtTokenUtil.generateToken(any(MerchantDTO.class))).willReturn(token);
+
+        signInConsumer = new SignInConsumer(merchantRepository, signInProducer, jwtTokenUtil);
 
     }
 
@@ -71,12 +108,18 @@ class SignInProducerTest {
     }
 
     @Test
-    void send() throws InterruptedException {
-        String given = "new message";
-        signInProducer.send(TOPIC, given);
-        ConsumerRecord<String, String> singleRecord = records.poll(100, TimeUnit.MILLISECONDS);
+    void consume() throws JsonProcessingException, InterruptedException {
+        //given
+        String given = MAPPER.writeValueAsString(new SignInRequest("name", "pswd"));
+        producer.send(new ProducerRecord<>(TOPIC, given));
+        producer.flush();
 
-        assertThat(singleRecord).isNotNull();
-        assertThat(singleRecord.value()).isEqualTo(given);
+
+
+        ArgumentCaptor<String> captor1 = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> captor2 = ArgumentCaptor.forClass(String.class);
+        verify(signInProducer).send(captor1.capture(), captor2.capture());
+
     }
+
 }
