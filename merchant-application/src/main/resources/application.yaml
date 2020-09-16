@@ -1,11 +1,16 @@
 app:
   kafka:
-    consumer-topic: test
+    sign-up-consumer:
+      topic: sign-up
+
+    sign-in-consumer:
+      topic: sign-in
+
+    sign-in-producer:
+      topic: sign-in-result
+
 ---
 spring:
-#  config:
-#    additional-location: app-config.properties
-
   datasource:
     url:      ${db.url:localhost:5432}
     username: ${db.username:farid}
@@ -22,6 +27,9 @@ spring:
     producer:
       bootstrap-servers: localhost:9092
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
       group-id: merchant
       bootstrap-servers: localhost:9092
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer

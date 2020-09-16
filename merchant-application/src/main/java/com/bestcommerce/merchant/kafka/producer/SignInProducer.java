@@ -7,12 +7,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class StringProducer implements Producer {
+public class SignInProducer implements Producer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
-    public StringProducer(KafkaTemplate<String, String> kafkaTemplate) {
+    public SignInProducer(KafkaTemplate<String, String> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
